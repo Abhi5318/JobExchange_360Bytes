@@ -1,0 +1,74 @@
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const sql = require("mssql");
+
+const app = express();
+
+// Middleware
+app.use(bodyParser.json());
+app.use(cors());
+
+// SQL Server configuration
+const config = {
+  user: "sa", // your SQL Server user
+  password: "Qtickets@123$", // your SQL Server password
+  server: "94.237.61.190", // your SQL Server IP or hostname
+  database: "JobExchange", // your SQL Server database
+  port: 1433,
+  options: {
+    encrypt: false, // Disable encryption
+    trustServerCertificate: true, // Trust self-signed certificates
+  },
+};
+
+// Connect to SQL Server
+async function connectToDatabase() {
+  try {
+    const pool = await sql.connect(config);
+    console.log("Connected to SQL Server");
+
+   
+
+    return pool;
+  } catch (err) {
+    console.error("Database connection failed:", err);
+    throw err;
+  }
+}
+
+// API route for submitting the form
+app.post("/api/contact", async (req, res) => {
+  const { name, email, message } = req.body;
+
+  if (!name || !email || !message || !subject) {
+    return res.status(400).json({ error: "Please fill all fields" });
+  }
+
+  try {
+    const pool = await connectToDatabase();
+    pool.connect(function (err) {
+      if (err) throw err;
+      console.log("Connected!");
+      var sql =
+        "insert into contact_us([name],email,subject,message,timestamp) values ('mohan','av@asdf.com','sdf','asdf','2/2/2005')";
+      con.query(sql, function (err, result) {
+        if (err) throw err;
+        console.log("1 record inserted");
+      });
+    });
+
+    res.status(200).json({ message: "Form submitted successfully!" });
+  } catch (err) {
+    console.error("Error inserting data into SQL:", err);
+    res.status(500).json({ error: "Failed to submit form" });
+  }
+});
+
+// Start the server
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+connectToDatabase();

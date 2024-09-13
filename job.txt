@@ -1,0 +1,69 @@
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const sql = require("mssql");
+
+const app = express();
+
+// Middleware
+app.use(bodyParser.json());
+app.use(cors());
+
+// SQL Server configuration
+const config = {
+  user: "sa", // your SQL Server user
+  password: "Qtickets@123$", // your SQL Server password
+  server: "94.237.61.190", // your SQL Server IP or hostname
+  database: "JobExchange", // your SQL Server database
+  options: {
+    encrypt: false, // Disable encryption
+    trustServerCertificate: true, // Trust self-signed certificates
+  },
+};
+
+// Connect to SQL Server
+async function connectToDatabase() {
+  try {
+    const pool = await sql.connect(config);
+    console.log("Connected to SQL Server");
+    return pool;
+  } catch (err) {
+    console.error("Database connection failed:", err);
+    throw err;
+  }
+}
+
+// API route for submitting the form
+app.post("/api/contact", async (req, res) => {
+  const { name, email, message } = req.body;
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "Please fill all fields" });
+  }
+
+  try {
+    const pool = await connectToDatabase();
+    const request = pool.request();
+    request.input("name", sql.NVarChar, name);
+    request.input("email", sql.NVarChar, email);
+    request.input("subject", sql.NVarChar, subject);
+    request.input("message", sql.NVarChar, message);
+
+    await request.query(
+      `INSERT INTO contact_us (name, email, message, subject) VALUES (@name, @email, @message, @subject)`
+    );
+
+    res.status(200).json({ message: "Form submitted successfully!" });
+  } catch (err) {
+    console.error("Error inserting data into SQL:", err);
+    res.status(500).json({ error: "Failed to submit form" });
+  }
+});
+
+// Start the server
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+connectToDatabase();
