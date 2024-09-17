@@ -42,12 +42,12 @@ const swaggerOptions = {
     info: {
       title: "Contact Form API",
       version: "1.0.0",
-      description: "Swagger API for handling contact form ",
+      description: "API for handling contact form submissions",
     },
     servers: [
       {
-        url: "http://localhost:5000", // Remote server URL
-        description: "Remote server",
+        url: "http://localhost:5000", // Server URL
+        description: "Local server",
       },
     ],
   },
@@ -57,7 +57,7 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Swagger API documentation
+// Swagger API documentation for ContactForm schema
 /**
  * @swagger
  * components:
@@ -91,6 +91,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *           description: Time of the form submission
  */
 
+// Swagger API for submitting a contact form
 /**
  * @swagger
  * /api/contact:
@@ -143,9 +144,10 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
+// Swagger API for retrieving contact messages
 /**
  * @swagger
- * /api/contact-messages:
+ * /api/contact/list:
  *   get:
  *     summary: Retrieve all contact form messages
  *     tags: [ContactForm]
@@ -155,10 +157,10 @@ app.post("/api/contact", async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-app.get("/api/contact-messages", async (req, res) => {
+app.get("/api/contact/list", async (req, res) => {
   try {
     const pool = await sql.connect(config);
-    const query = `SELECT * FROM contact_us`;
+    const query = `SELECT * FROM contact_us ORDER BY timestamp DESC`;
     const result = await pool.request().query(query);
 
     res.status(200).json(result.recordset);
@@ -170,7 +172,7 @@ app.get("/api/contact-messages", async (req, res) => {
 
 // Start the server
 const PORT = 5000;
-app.listen(5000, "0.0.0.0", () => {
-  console.log("Server is running on port 5000");
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
   connectToDatabase();
 });
